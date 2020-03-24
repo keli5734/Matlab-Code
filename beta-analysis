@@ -253,4 +253,180 @@ ylabel('Accumulated number of M1')
 xlabel('Days post infection (p.i.)')
 set(gca, 'FontSize',24)
 
+
+%% Fig. S13 in supplementary materials
+
+beta = 1e-5:2e-6:2.8e-5;%1.2e-4;
+len_beta = length(beta);
+R_values = zeros(len_beta,4);
+R_m1_vector = zeros(len_beta,len_inf);
+R_m1_vector_round = zeros(len_beta,len_inf);
+for i = 1:len_beta 
+        [~,y_inf] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
+                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
+                        beta(i),delta_I,p,c,kappa,q1,q2,...
+                        kappa_a,mu,rho, epsilon,lambda);
+    for j = 1:len_inf
+        R_m1_vector(i,j) = (k1/(1 + s1*(y_inf(j,3)/M0))+ q1 * y_inf(j,5) + q2 * y_inf(j,6)) * y_inf(j,1) /((k_m1 + delta) * y_inf(j,2));
+        R_m1_vector_round(i,j) = round(R_m1_vector(i,j),2);
+    end 
+        indx = find(R_m1_vector_round(i,:) ~= 1);
+        if isempty(indx) == 1
+            R_values(i,2) = 15;
+        else 
+            R_values(i,2) = (indx(1)-1)/24;
+        end 
+        R_values(i,1) = beta(i);
+        R_values(i,3) = max(R_m1_vector(i,:));
+        
+        [~,indx_2] = max(R_m1_vector(i,:));
+        R_values(i,4) =  (indx_2-1)/24;
+end 
+
+
+
+beta_II = 3e-5:2e-6:6.08e-5;%1.2e-4;
+len_beta_II = length(beta_II);
+R_values_II = zeros(len_beta_II,4);
+R_m1_vector_II = zeros(len_beta_II,len_inf);
+R_m1_vector_round_II = zeros(len_beta,len_inf);
+
+for i = 1:len_beta_II 
+        [~,y_inf] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
+                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
+                        beta_II(i),delta_I,p,c,kappa,q1,q2,...
+                        kappa_a,mu,rho, epsilon,lambda);
+    for j = 1:len_inf
+        R_m1_vector_II(i,j) = (k1/(1 + s1*(y_inf(j,3)/M0))+ q1 * y_inf(j,5) + q2 * y_inf(j,6)) * y_inf(j,1) /((k_m1 + delta) * y_inf(j,2));
+        R_m1_vector_round_II(i,j) = round(R_m1_vector_II(i,j),2);
+    end 
+        indx_II = find(R_m1_vector_round_II(i,:) ~= 1);
+        if isempty(indx_II) == 1
+            R_values_II(i,2) = 15;
+        else 
+            R_values_II(i,2) = (indx_II(1)-1)/24;
+        end 
+        R_values_II(i,1) = beta_II(i);
+        R_values_II(i,3) = max(R_m1_vector_II(i,:));
+        
+        [~,indx_II_2] = max(R_m1_vector_II(i,:));
+        R_values_II(i,4) = (indx_II_2-1)/24;
+end 
+
+
+
+
+
+
+
+beta_III = 6.1e-5:2e-6:1.2e-4;
+len_beta_III = length(beta_III);
+R_values_III = zeros(len_beta_III,4);
+R_m1_vector_III = zeros(len_beta_III,len_inf);
+R_m1_vector_round_III = zeros(len_beta,len_inf);
+
+for i = 1:len_beta_III 
+        [~,y_inf] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
+                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
+                        beta_III(i),delta_I,p,c,kappa,q1,q2,...
+                        kappa_a,mu,rho, epsilon,lambda);
+    for j = 1:len_inf
+        R_m1_vector_III(i,j) = (k1/(1 + s1*(y_inf(j,3)/M0))+ q1 * y_inf(j,5) + q2 * y_inf(j,6)) * y_inf(j,1) /((k_m1 + delta) * y_inf(j,2));
+        R_m1_vector_round_III(i,j) = round(R_m1_vector_III(i,j),2);
+    end 
+        indx_III = find(R_m1_vector_round_III(i,:) ~= 1);
+        if isempty(indx_III) == 1
+            R_values_III(i,2) = 15;
+        else 
+            R_values_III(i,2) = (indx_III(1)-1)/24;
+        end 
+        R_values_III(i,1) = beta_III(i);
+        R_values_III(i,3) = max(R_m1_vector_III(i,:));
+        
+        [~,indx_III_2] = max(R_m1_vector_III(i,:));
+        R_values_III(i,4) = (indx_III_2-1)/24;
+end 
+
+
+
+
+
+%%
+
+scatter(beta,R_values(:,3),'o',...
+             'MarkerFaceColor',[0.3010 0.7450 0.9330],...
+             'LineWidth',.8, 'MarkerEdgeAlpha',.8, 'MarkerFaceAlpha',.8, 'MarkerEdgeColor', 'none')%,'SizeData',15*fliplr(R_values(:,3)))
+
+hold on 
+scatter(beta_II,R_values_II(:,3),'o',...
+             'MarkerFaceColor',[0.4940 0.1840 0.5560],...
+             'LineWidth',.8, 'MarkerEdgeAlpha',.8, 'MarkerFaceAlpha',.8, 'MarkerEdgeColor', 'none')%,'SizeData',15*fliplr(R_values_II(:,3)))
+
+scatter(beta_III,R_values_III(:,3),'o',...
+             'MarkerFaceColor',[0.9290 0.6940 0.1250],...
+             'LineWidth',.8, 'MarkerEdgeAlpha',.8, 'MarkerFaceAlpha',.8, 'MarkerEdgeColor', 'none')%,'SizeData',15*fliplr(R_values_III(:,3)))
+ 
+%plot([beta,beta_II,beta_III],[R_values(:,2)',R_values_II(:,2)',R_values_III(:,2)'] ,'k:','LineWidth',.5)   
+
+yline(1,'k--','LineWidth',.5)
+
+xlabel('\beta') 
+ylabel('Peak values of R_{M1}')
+%legend('Natural regulation', 'Activation by infection', 'Overall')
+legend('Region-I','Region-II','Region-III','EdgeColor','None')
+set(gca, 'FontSize',24)         
+
+
+
+axes('position',[0.208571428571429,0.635238095238095,0.271428571428571,0.247619047619049]) % create a new pair of axes inside current figure
+box on % put box around new pair of axes
+
+
+plot(report_time_inf, R_m1_vector(1,:),'Color',[0.3010 0.7450 0.9330],'LineWidth',1.5)
+hold on 
+scatter(R_values(1,4), R_values(1,3),'o',...
+             'MarkerFaceColor',[0.3010 0.7450 0.9330],...
+             'LineWidth',.8, 'MarkerEdgeAlpha',.8, 'MarkerFaceAlpha',.8, 'MarkerEdgeColor', 'none');
+         
+         
+         
+         
+         
+hold on 
+plot(report_time_inf,R_m1_vector_II(5,:),'Color',[0.4940 0.1840 0.5560],'LineWidth',1.5)
+scatter(R_values_II(5,4), R_values_II(5,3),'o',...
+             'MarkerFaceColor',[0.4940 0.1840 0.5560],...
+             'LineWidth',.8, 'MarkerEdgeAlpha',.8, 'MarkerFaceAlpha',.8, 'MarkerEdgeColor', 'none');
+         
+%plot(report_time_inf,R_m1_vector_II(10,:),'Color',[0.4940 0.1840 0.5560],'LineWidth',1.5)
+%scatter(R_values_II(10,2),1,'o',...
+%             'MarkerFaceColor',[0.4940 0.1840 0.5560],...
+%             'LineWidth',.8, 'MarkerEdgeAlpha',.8, 'MarkerFaceAlpha',.8, 'MarkerEdgeColor', 'none');    
+
+         
+         
+hold on 
+plot(report_time_inf,R_m1_vector_III(1,:),'Color',[0.9290 0.6940 0.1250],'LineWidth',1.5)
+
+scatter(R_values_III(1,4),R_values_III(1,3),'o',...
+             'MarkerFaceColor',[0.9290 0.6940 0.1250],...
+             'LineWidth',.8, 'MarkerEdgeAlpha',.8, 'MarkerFaceAlpha',.8, 'MarkerEdgeColor', 'none');
+         
+%plot(report_time_inf,R_m1_vector_III(5,:),'Color',[0.9290 0.6940 0.1250],'LineWidth',1.5)
+
+%scatter(R_values_III(5,2),1,'o',...
+%             'MarkerFaceColor',[0.9290 0.6940 0.1250],...
+%             'LineWidth',.8, 'MarkerEdgeAlpha',.8, 'MarkerFaceAlpha',.8, 'MarkerEdgeColor', 'none');
+      
+xlabel('Days post infection (p.i.)')
+ylabel('R_{M_1}')
+set(gca,'FontSize',22)
+
+
+
+
+
+
+
+
       
