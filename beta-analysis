@@ -123,7 +123,7 @@ end
 xAtMax_beta = beta(indexOfMaxY_beta); % the beta value that achieves maximal value of the M1 AUC.
 beta_N = delta_I * (c + kappa * y_im(end,2)) / (p * T0); % the beta value that determines infection will take hold or not. 
 
-%% Plot the AUC of viral shedding and of the M1 in the same figure with colored regions. 
+%% Plot the AUC of viral shedding and of the M1 in the same figure with colored regions. (Fig. 5 in the main text of the paper)
 figure(39)
 yyaxis left 
 plot(beta,plot_var(:,2),'k-.','LineWidth',2)
@@ -163,5 +163,94 @@ ylabel('Number of epithelial cells')
 set(gca, 'FontSize',24)
 
 
+%% detailed viral replication and macrophage dynamics in regions I, II and III (Fig. 6 in the main text of the paper)
+
+beta = [3.08e-5, 6.08e-5, 10.08e-5]; % beta in regions I, II and III respectively.
+len_beta = length(beta); % length of beta
+
+for j = 1:len_beta
+        [~,y_inf_beta] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
+                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
+                        beta(j),delta_I,p,c,kappa,q1,q2,...       
+                        kappa_a,mu,rho,A_ast);
+                        
+              V_Growth = p*y_inf(:,5);
+              V_Natural = c*y_inf(:,6);
+              V_Macrophage = kappa * y_inf(:,6) .* y_inf(:,2);
+              V_Abs = kappa_a * y_inf(:,6) .* y_inf(:,7);
+
+              figure(j+2)
+              semilogy(report_time_inf, V_Growth,'k','LineWidth',1.5) % Viral Growth
+              hold on
+              semilogy(report_time_inf, V_Natural, 'k:', 'LineWidth',1.5) % viral natural decay
+              semilogy(report_time_inf, V_Macrophage, 'k-.', 'LineWidth',1.5) % viral decay by M1
+              semilogy(report_time_inf, V_Abs, 'k--', 'LineWidth',1.5) % viral decay by Abs
+              ylim([1e-1,1e+8])
+              hold off
+              ylabel('Viral dynamical rate (u_v/day)')
+              xlabel('Days post infection (p.i.)')
+              legend('viral growth','natural decay','engulfed by M1','killed by Abs','FontSize',18)
+              set(gca,'YTick',[0.01,1,100,10000,1000000,100000000],'FontSize',23)
+              
+              figure(j+10)
+              plot(report_time_inf, y_inf(:,1),'k','LineWidth',2)
+              hold on 
+              plot(report_time_inf, y_inf(:,1),'k-.','LineWidth',2)
+              plot(report_time_inf, y_inf(:,1),'k--','LineWidth',2)
+              hold off
+              legend('M','M1','M2')
+              ylabel('Number of macrophages')
+              xlabel('Days post infection (p.i.)')
+              set(gca, 'FontSize',20)
+end 
 
 
+
+
+%% plot different accumulation behaviours of M1 in regions II and III. 
+
+% Fig. 7a in the main text of the paper
+k_color = 5;
+k_alpha = 0.5;
+figure(85)
+for beta  = [4.08e-5,6.08e-5] 
+    [~,y_inf] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
+                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
+                        beta,delta_I,p,c,kappa,q1,q2,...
+                        kappa_a,mu,rho, A_ast);
+        
+       cumarea = cumtrapz(y_inf(:,2));
+       cmap = colormap(pink(12));
+       area(report_time_inf, cumarea,'FaceAlpha',k_alpha, 'FaceColor',cmap(k_color,:),'LineWidth',1) 
+       hold on 
+       k_color = k_color - 1;
+       k_alpha = k_alpha -.1;
+end 
+ylabel('Accumulated number of M1')
+xlabel('Days post infection (p.i.)')
+set(gca, 'FontSize',24)
+
+
+
+% Fig. 7b in the main text of the paper
+k_color = 5;
+k_alpha = 0.5;
+figure(85)
+for beta  = [6.08e-5,10.08e-5] 
+    [~,y_inf] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
+                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
+                        beta,delta_I,p,c,kappa,q1,q2,...
+                        kappa_a,mu,rho, A_ast);
+        
+       cumarea = cumtrapz(y_inf(:,2));
+       cmap = colormap(pink(12));
+       area(report_time_inf, cumarea,'FaceAlpha',k_alpha, 'FaceColor',cmap(k_color,:),'LineWidth',1) 
+       hold on 
+       k_color = k_color - 1;
+       k_alpha = k_alpha -.1;
+end 
+ylabel('Accumulated number of M1')
+xlabel('Days post infection (p.i.)')
+set(gca, 'FontSize',24)
+
+      
