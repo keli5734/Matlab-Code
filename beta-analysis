@@ -148,7 +148,7 @@ xlabel('\beta')
 xlim([0,1.2e-4])
 set(gca, 'FontSize',15)
 
-%% Target cell availability against beta 
+%% Target cell availability against beta  (Fig.8 in the main text of the paper)
 figure(34)
 plot(beta, T_var, 'k-.', 'LineWidth', 2)
 xlim([0, 1.2e-4])
