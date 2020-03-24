@@ -38,7 +38,7 @@ options = odeset('RelTol',1e-10,'AbsTol',1e-20);
 
 
 [~,y2] = ode15s(@fun_NonInf_SepM, report_time, init, options,...
-                k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,epsilon);  
+                k1,k2,k_m1,k_m2,delta,s1,s2,M0,g);  
                 
                 % use ode15s function to solve ODE equtions. 
                 % The function 'fun_NonInf_SepM' is in a separated file. 
