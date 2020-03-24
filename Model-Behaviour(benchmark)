@@ -45,7 +45,8 @@ options = odeset('RelTol',1e-10,'AbsTol',1e-20);
                 
 
 
-%% plot figure of macrophage dynamics in the absence of viral infection
+%% plot figure of macrophage dynamics in the absence of viral infection (Fig.S1 in supplementary materials)
+
 figure(1)
 plot(report_time, y2(:,1),'k','LineWidth',2);
 hold on 
@@ -102,8 +103,6 @@ V0 = 3.3e-1;
 A0 = 0;
 
 
-
-
 M_inf(1) = M_inf0;
 M1_inf(1) = M1_inf0;
 M2_inf(1) = M2_inf0;
@@ -125,7 +124,7 @@ init_inf = [M_inf0,M1_inf0,M2_inf0,T0,I0,V0,A0]';
 
 %% plot figures 
 
-%% the dynamics of M1, M2 macrophage and V
+%% the dynamics of M1, M2 macrophage and V (Fig.3a in the main text of the paper)
 figure(2)
 yyaxis left
 semilogy(report_time_inf, y_inf(:,6),'k','LineWidth',2)
@@ -143,7 +142,7 @@ xlabel('Days post infection (p.i.)')
 legend('V', 'M1','M2','FontSize',20)
 set(gca, 'FontSize',24)
 
-%% detailed contribution of each components on the right-hand side of dV/dt to viral replication
+%% detailed contribution of each components on the right-hand side of dV/dt to viral replication (Fig.3b in the main text of the paper)
 figure(3)
 V_Growth = p*y_inf(:,5);
 V_Natural = c*y_inf(:,6);
@@ -163,7 +162,7 @@ xlabel('Days post infection (p.i.)')
 legend('viral growth','natural decay','engulfed by M1','killed by Abs','FontSize',18)
 set(gca,'YTick',[0.01,1,100,10000,1000000,100000000],'FontSize',23)
 
-%% plot the effective reproduction number of M1 with M1 dynamics during infection 
+%% plot the effective reproduction number of M1 with M1 dynamics during infection (Fig.4 in the main text of the paper)
 R_M1 = (k1/(1 + s1*(y_inf(:,3)/M0)) + q1 * y_inf(:,5) + q2 * y_inf(:,6)) .* y_inf(:,1) ./((k_m1 + delta) * y_inf(:,2));
 figure(5)
 yyaxis left
@@ -177,5 +176,28 @@ xlabel('Days post infection (p.i.)')
 ylabel('Number of M1 macropahges')
 legend('R_{M1}','R_{M1} = 1', 'M1')
 set(gca,'FontSize',20,'ycolor','k')
+
+%% plot dynamics of healthy epithelial cells (T), infected cells (I) and antibody (A) during infection (Fig. S2 in supplementary materials)
+
+figure(99)
+plot(report_time_inf, y_inf(:,4), 'k','LineWidth', 2)
+xlabel('Days post infection (p.i.)')
+ylabel('Number of epithelial cells')
+set(gca, 'FontSize',20)
+
+figure(98)
+plot(report_time_inf, y_inf(:,5), 'k','LineWidth', 2)
+xlabel('Days post infection (p.i.)')
+ylabel('Number of infected cells')
+set(gca, 'FontSize',20)
+
+
+figure(97)
+plot(report_time_inf, y_inf(:,7), 'k','LineWidth', 2)
+xlabel('Days post infection (p.i.)')
+ylabel('Anyibody')
+set(gca, 'FontSize',20)
+
+
 
 
