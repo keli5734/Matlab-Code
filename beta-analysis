@@ -165,7 +165,7 @@ set(gca, 'FontSize',24)
 
 %% detailed viral replication and macrophage dynamics in regions I, II and III (Fig. 6 in the main text of the paper)
 
-beta = [3.08e-5, 6.08e-5, 10.08e-5]; % beta in regions I, II and III respectively.
+beta = [2.88e-5, 6.08e-5, 10.08e-5]; % beta in regions I, II and III respectively.
 len_beta = length(beta); % length of beta
 
 for j = 1:len_beta
