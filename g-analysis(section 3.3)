@@ -243,8 +243,8 @@ xAtMax_beta = beta(indexOfMaxY_beta);
 
 %%
 Indx_R_less_1 = find(R < 1);
-Indx_R_less_1_first = Indx_R_less_1(1);
-beta1(i) = kappa(Indx_R_less_1_first);
+Indx_R_less_1_last = Indx_R_less_1(end);
+beta1(i) = kappa(Indx_R_less_1_last);
 beta2(i) = xAtMax_kappa;
 
 end 
