@@ -69,7 +69,7 @@ for i = 1:g_length
 end
 
 
-%% Fig. 9a in the main text of the paper
+%% Fig. 6a shown in the main text of the paper
 plot(g, vectors(:,2),'k-','LineWidth',2)
 hold on
 plot(g, vectors(:,3),'k-.','LineWidth',1)
@@ -81,7 +81,7 @@ set(gca,'FontSize',20)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% the following code is to generate Fig. 9b in the main text of the paper
+% the following code is to generate Fig. 6b in the main text of the paper
 
 k1 = 0.5; 
 k2 = 0.5;  
@@ -231,77 +231,37 @@ T_var= zeros(len_beta,1);
          % Overall AUC           
          plot_var(j,1) = trapz(y_inf_beta(:,6)); % Virus
          plot_var(j,2) = trapz(y_inf_beta(:,2)); % Macrophages M
+         R(j) = (p * beta(j) * T0) / (delta_I * (c+ kappa * y2(end,2)  + kappa_a * y2(end,7)));
  end
  
 %% 
 
 [maxY_beta, indexOfMaxY_beta] = max(plot_var(:,2));
 xAtMax_beta = beta(indexOfMaxY_beta);
-         
-%% Calculation correlation
-cor_len = 5;
-cor_vec = zeros(len_beta - cor_len, 1);
+        
 
-
-
-    for ii = 1:len_beta - cor_len
-    
-    cor_max = corrcoef(plot_var(ii:(cor_len+ii-1),2), plot_var(ii:(cor_len+ii-1),1));
-    cor_vec(ii) = cor_max(2);
-    end
 
 %%
-cor_vec = round(cor_vec,4);
-
-cor_vec1 = [];
-for jj = 1:length(cor_vec)
-    if cor_vec(jj) == 1
-        cor_vec1(jj) = cor_vec(jj);
-    end 
-end 
-cor_vec1 = cor_vec1(cor_vec1 ~= 0);
-len_corvec1 = length(cor_vec1);
-
-cor_vec2 = [];
-for jj = 1:length(cor_vec)
-    if (cor_vec(jj) < 1) && (cor_vec(jj) > 0)
-        cor_vec2(jj) = cor_vec(jj);
-    end 
-end 
-cor_vec2 = cor_vec2(cor_vec2 ~= 0);
-
-cor_vec3 = [];
-for jj = 1:length(cor_vec)
-    if (cor_vec(jj) < 0)
-        cor_vec3(jj) = cor_vec(jj);
-    end 
-end 
-cor_vec3 = cor_vec3(cor_vec3 ~= 0);
-
-            
-%%
-
-beta1(i) = delta_I * (c + kappa * y_im(end,2)) / (p * T0);
-beta3(i) = xAtMax_beta;
-if isempty(cor_vec1) == 1
-    beta2(i) = beta3(i);
-else
-    beta2(i) = beta(len_corvec1);
-end 
-
-end
+Indx_R_less_1 = find(R < 1);
+Indx_R_less_1_first = Indx_R_less_1(1);
+beta1(i) = kappa(Indx_R_less_1_first);
+beta2(i) = xAtMax_kappa;
 
 end 
 
-%%
+%% Fig.6b shown in the main text of the paper. 
 
-area(g,max(beta)*ones(1,g_length),'FaceAlpha',.7,'FaceColor',[0.93,0.69,0.13],'EdgeColor','None')
+area(g,max(beta)*ones(1,g_length),'FaceAlpha',.2,'FaceColor',[0.93,0.69,0.13],'EdgeColor','None')
 hold on
-area(g,beta3,'FaceAlpha',.8,'FaceColor',[0.81,0.37,0.90],'EdgeColor','None') 
-area(g,beta2,'FaceAlpha',.8,'FaceColor',[0.17,0.73,0.96],'EdgeColor','None') 
-area(g,beta1,'FaceAlpha',1,'FaceColor',[0.5 0.5 0.5],'EdgeColor','None') 
+area(g,beta2,'FaceAlpha',.24,'FaceColor',[.72,.27,1],'EdgeColor','None') 
+area(g,beta1,'FaceAlpha',.1,'FaceColor',[.5,.5,.5],'EdgeColor','None') 
 ylim([0,max(beta)])
 ylabel('\beta')
 xlabel('g')
 set(gca,'FontSize',18)
+
+%% Fig. 6c shown in the main text of the paper
+
+
+
 
