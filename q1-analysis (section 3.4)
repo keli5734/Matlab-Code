@@ -113,7 +113,7 @@ for j = 1:len_q1
          
 end
 
-%% Plot_q1_sensitivity (Fig.10 in the main text of the paper)
+%% Plot_q1_sensitivity (Fig.7a shown in the main text of the paper)
 figure(34)
 yyaxis left 
 semilogx(q1,plot_var_q1(:,2),'k-.','LineWidth',2)
@@ -127,3 +127,44 @@ legend('M1','V')
 xlabel('log(q_1)') 
 
 set(gca, 'FontSize',24)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+q1 = 1e-6;
+k1 = 0.02:0.01:1;
+len_k1 = length(k1);
+plot_var_k1 = zeros(len_k1,2);
+
+for j = 1:len_k1
+
+        [~,y_inf_k1] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
+                        k1(j),k2,k_m1,k_m2,delta,s1,s2,M0,g,...
+                        beta,delta_I,p,c,kappa,q1,q2,...
+                        kappa_a,mu,rho,epsilon,lambda);
+                    
+         plot_var_k1(j,1) = trapz(y_inf_k1(:,6));
+         plot_var_k1(j,2) = trapz(y_inf_k1(:,2));   
+         
+         
+         
+end
+
+%% Plot_k1_sensitivity (Fig.7b shown in the main text of the paper)
+
+figure(34)
+yyaxis left 
+semilogx(k1,plot_var_k1(:,2),'k-.','LineWidth',2)
+ylabel('AUC of Macrophages')
+set(gca, 'ycolor','k')
+yyaxis right 
+semilogx(k1,plot_var_k1(:,1),'k-','LineWidth',2)
+ylabel('AUC of viral Load')
+set(gca, 'ycolor','k')
+legend('M1','V')
+xlabel('k_1') 
+
+set(gca, 'FontSize',24)
+
+
+
+
