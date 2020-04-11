@@ -260,7 +260,8 @@ ylabel('\beta')
 xlabel('g')
 set(gca,'FontSize',18)
 
-%% Fig. 6c shown in the main text of the paper
+%% code of generating Fig. 6c shows in 'beta-analysis (section 3.2)'
+%% selecting g values are 0.2 and 2 and run the code in section 3.2 to generate Fig. 6c.
 
 
 
