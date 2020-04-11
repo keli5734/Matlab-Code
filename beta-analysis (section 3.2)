@@ -1,0 +1,172 @@
+%% Macrophage parameters 
+
+k1 = 0.5;  % conversion rate of M to M1 
+k2 = 0.5;  % conversion rate of M to M2
+k_m1 = 24/72; % conversion rate of M1 to M  
+k_m2 = 24/72; % conversion rate of M2 to M
+delta = .02;  % natural decay rate of M1 and M2
+s1 = 1; % suppressive effect of M2 on conversion process of M to M1
+s2 = 1; % prompting effect of M1 on conversion process of M to M2
+g = 0.2; % regrowth rate of M 
+
+%% Setting of simulation time 
+
+t0 = 0;
+t_end = 1000; % simulation of 1000 days
+report_point = (t_end - t0) * 24 + 1;
+report_time = linspace(t0,t_end,report_point);
+len = length(report_time);
+
+%% Variables setting
+
+M = zeros(1,len);
+M1 = zeros(1,len);
+M2 = zeros(1,len);
+
+M0 = 1e+6; % initial value of M 
+M10 = 0;  % initial value of M1
+M20 = 0;  % initial value of M2
+
+M(1) = M0;
+M1(1) = M10;
+M2(1) = M20;
+
+
+init = [M0,M10,M20]';
+
+options = odeset('RelTol',1e-10,'AbsTol',1e-20); 
+
+
+[~,y2] = ode15s(@fun_NonInf_SepM, report_time, init, options,...
+                k1,k2,k_m1,k_m2,delta,s1,s2,M0,g);  
+                
+                % use ode15s function to solve ODE equtions. 
+                % The function 'fun_NonInf_SepM' is in a separated file. 
+                
+                
+%% viral infection parameters
+
+delta_I = 3.6; % decay rate of infected cells
+p = 7.1e-2; % viral production rate 
+c = 20;  % natural decay rate of virions
+kappa = 24 * 3.2e-5; % engulfment rate of M1 to virus
+q1 = 1e-6; % activation rate of M1 by infected cells
+q2 = 1e-6; %1e-6; % activation rate of M1 by virus
+
+kappa_a = .2; % killing rate of virus by antibody
+mu =  1e-6; % production rate of antibody
+rho = 1; % self-production rate of antibody               
+A_ast  = 1e+5; % assumed carrying capacity of antibody              
+
+
+%% time setting of viral infection
+
+t0_inf = 0;
+t_end_inf = 15; % consider 15 days post inoculation of virus
+report_point_inf = (t_end_inf - t0_inf) * 24 + 1;
+report_time_inf = linspace(t0_inf, t_end_inf, report_point_inf);
+len_inf = length(report_time_inf);
+
+%% Viral Variables 
+
+M_inf = zeros(1,len_inf);
+M1_inf = zeros(1,len_inf);
+M2_inf = zeros(1,len_inf);
+T = zeros(1,len_inf);
+I = zeros(1,len_inf);
+V = zeros(1,len_inf);
+A = zeros(1,len_inf);
+
+
+M_inf0 = y2(end,1);  % intial value of M in infection, equivalent to the number of M at day 1000 in the absence of infection
+M1_inf0 = y2(end,2); % intial value of M1 in infectione, quivalent to the number of M1 at day 1000 in the absence of infection
+M2_inf0 = y2(end,3); % intial value of M2 in infection, equivalent to the number of M2 at day 1000 in the absence of infection
+T0 = 4e+8;
+I0 = 0;
+V0 = 3.3e-1; 
+A0 = 0;
+
+
+
+
+M_inf(1) = M_inf0;
+M1_inf(1) = M1_inf0;
+M2_inf(1) = M2_inf0;
+T(1) = T0;
+I(1) = I0;
+V(1) = V0;
+A(1) = A0;
+
+
+init_inf = [M_inf0,M1_inf0,M2_inf0,T0,I0,V0,A0]';
+
+%%                
+beta  = 8e-6 : .5e-6 : 1.2e-4; % setting the ranges of beta
+len_beta = length(beta); % length of beta
+plot_var = zeros(len_beta,2); 
+T_var= zeros(len_beta,1);
+
+for j = 1:len_beta
+        [~,y_inf_beta] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
+                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
+                        beta(j),delta_I,p,c,kappa,q1,q2,...       
+                        kappa_a,mu,rho,A_ast);
+         % Overall AUC           
+         plot_var(j,1) = trapz(y_inf_beta(:,6)); % the AUC of viral shedding
+         plot_var(j,2) = trapz(y_inf_beta(:,2)); % the AUC of M1 macrophages 
+        
+         % the availibility of target cells
+         T_var(j) = y_inf_beta(end,4);
+end 
+
+[maxY_beta, indexOfMaxY_beta] = max(plot_var(:,2)); % find the maximal value of the AUC of M1 and the postition of that value
+xAtMax_beta = beta(indexOfMaxY_beta); % the beta value that achieves maximal value of the M1 AUC.
+beta_N = delta_I * (c + kappa * y_im(end,2)) / (p * T0); % the beta value that determines infection will take hold or not. 
+
+%% Plot the AUC of viral shedding and of the M1 in the same figure with colored regions. (Fig. 4 shown in the main text of the paper)
+figure(39)
+yyaxis left 
+plot(beta,plot_var(:,2),'k-.','LineWidth',2)
+ylabel('AUC of M1')
+set(gca, 'ycolor','k')
+yyaxis right 
+plot(beta,plot_var(:,1),'k-','LineWidth',2)
+ylabel('AUC of viral Load')
+set(gca, 'ycolor','k')
+
+hold on
+patch([0 beta_N beta_N 0], [0 0 max(ylim) max(ylim)], [0.5 0.5 0.5],'FaceAlpha',.6,'EdgeColor','None')
+patch([beta_N beta_N xAtMax_beta xAtMax_beta ], [0 max(ylim) max(ylim) 0], [0.4940 0.1840 0.5560],'FaceAlpha',.15,'EdgeColor','None')
+patch([xAtMax_beta max(xlim) max(xlim) xAtMax_beta], [0 0 max(ylim) max(ylim)], [0.9290 0.6940 0.1250],'FaceAlpha',.15,'EdgeColor','None')
+hold off
+
+legend('M1','V')
+xlabel('\beta') 
+xlim([0,1.2e-4])
+set(gca, 'FontSize',15)
+
+
+
+%% Target cell availability against beta 
+figure(34)
+plot(beta, T_var, 'k-.', 'LineWidth', 2)
+xlim([0, 1.2e-4])
+
+hold on
+patch([0 beta_N beta_N 0], [0 0 max(ylim) max(ylim)], [0.5 0.5 0.5],'FaceAlpha',.6,'EdgeColor','None')
+patch([beta_N beta_N xAtMax_beta xAtMax_beta ], [0 max(ylim) max(ylim) 0], [0.4940 0.1840 0.5560],'FaceAlpha',.15,'EdgeColor','None')
+patch([xAtMax_beta max(xlim) max(xlim) xAtMax_beta], [0 0 max(ylim) max(ylim)], [0.9290 0.6940 0.1250],'FaceAlpha',.15,'EdgeColor','None')
+hold off
+
+xlabel('\beta') 
+ylabel('Number of epithelial cells')
+set(gca, 'FontSize',24)
+
+
+
+
+
+
+
+
+      
