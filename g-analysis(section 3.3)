@@ -231,7 +231,7 @@ T_var= zeros(len_beta,1);
          % Overall AUC           
          plot_var(j,1) = trapz(y_inf_beta(:,6)); % Virus
          plot_var(j,2) = trapz(y_inf_beta(:,2)); % Macrophages M
-         R(j) = (p * beta(j) * T0) / (delta_I * (c+ kappa * y2(end,2)  + kappa_a * y2(end,7)));
+         R(j) = (p * beta(j) * T0) / (delta_I * (c+ kappa * y2(end,2)  + kappa_a * y_inf_beta(1,7)));
  end
  
 %% 
