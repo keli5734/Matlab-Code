@@ -121,7 +121,7 @@ end
 
 [maxY_beta, indexOfMaxY_beta] = max(plot_var(:,2)); % find the maximal value of the AUC of M1 and the postition of that value
 xAtMax_beta = beta(indexOfMaxY_beta); % the beta value that achieves maximal value of the M1 AUC.
-beta_N = delta_I * (c + kappa * y_im(end,2)) / (p * T0); % the beta value that determines infection will take hold or not. 
+beta_N = delta_I * (c + kappa * y2(end,2)) / (p * T0); % the beta value that determines infection will take hold or not. 
 
 %% Plot the AUC of viral shedding and of the M1 in the same figure with colored regions. (Fig. 4 shown in the main text of the paper)
 figure(39)
@@ -143,7 +143,7 @@ hold off
 legend('M1','V')
 xlabel('\beta') 
 xlim([0,1.2e-4])
-set(gca, 'FontSize',15)
+set(gca, 'FontSize',24)
 
 
 
