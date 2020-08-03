@@ -65,7 +65,7 @@ beta = 3e-8; % viral infectivity
 delta_I = 2; % decay rate of infected cells
 p = 210; % viral production rate 
 c = 5;  % natural decay rate of virions
-kappa = 2.2e-4;%7.3e-5; % engulfment rate of M1 to virus <---- 24*3.2e-5
+kappa = 7.3e-5; % engulfment rate of M1 to virus <---- 24*3.2e-5
 q1 = 1e-6; % activation rate of M1 by infected cells
 q2 = 1e-6; %1e-6; % activation rate of M1 by virus
 
