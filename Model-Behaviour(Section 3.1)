@@ -61,15 +61,15 @@ set(gca, 'FontSize',24)
                 
 %% Parameters of Virus and virus-macrophage interactions                
 
-beta = 3.8e-5; % viral infectivity
-delta_I = 3.6; % decay rate of infected cells
-p = 7.1e-2; % viral production rate 
-c = 20;  % natural decay rate of virions
-kappa = 24 * 3.2e-5; % engulfment rate of M1 to virus
+beta = 3e-8; % viral infectivity
+delta_I = 2; % decay rate of infected cells
+p = 210; % viral production rate 
+c = 5;  % natural decay rate of virions
+kappa = 2.2e-4;%7.3e-5; % engulfment rate of M1 to virus <---- 24*3.2e-5
 q1 = 1e-6; % activation rate of M1 by infected cells
 q2 = 1e-6; %1e-6; % activation rate of M1 by virus
 
-kappa_a = .2; % killing rate of virus by antibody
+kappa_a = 1; % killing rate of virus by antibody
 mu =  1e-6; % production rate of antibody
 rho = 1; % self-production rate of antibody               
 A_ast  = 1e+5; % assumed carrying capacity of antibody              
@@ -97,9 +97,9 @@ A = zeros(1,len_inf);
 M_inf0 = y2(end,1);  % intial value of M in infection, equivalent to the number of M at day 1000 in the absence of infection
 M1_inf0 = y2(end,2); % intial value of M1 in infectione, quivalent to the number of M1 at day 1000 in the absence of infection
 M2_inf0 = y2(end,3); % intial value of M2 in infection, equivalent to the number of M2 at day 1000 in the absence of infection
-T0 = 4e+8;
+T0 = 7e+7;
 I0 = 0;
-V0 = 3.3e-1; 
+V0 = 1; 
 A0 = 0;
 
 
@@ -121,14 +121,15 @@ init_inf = [M_inf0,M1_inf0,M2_inf0,T0,I0,V0,A0]';
                         kappa_a,mu,rho, A_ast); % the function of 'fun_inf_lambda' is in a separated file. 
                         
 
-
+%%
+R_basic  = p*beta*T0/(delta_I*(c+kappa*M1_inf0))
 %% plot figures 
 
 %% the dynamics of M1, M2 macrophage and V (Fig.3a in the main text of the paper)
 figure(2)
-yyaxis left
+%yyaxis left
 semilogy(report_time_inf, y_inf(:,6),'k','LineWidth',2)
-ylim([1e-2,1e+5])
+ylim([1e-1,1e+10])
 ylabel('Viral load (fold change)')
 set(gca, 'ycolor','k')
 yyaxis right
@@ -143,7 +144,6 @@ legend('V', 'M1','M2','FontSize',20)
 set(gca, 'FontSize',24)
 
 %% detailed contribution of each components on the right-hand side of dV/dt to viral replication (Fig.3b in the main text of the paper)
-figure(3)
 V_Growth = p*y_inf(:,5);
 V_Natural = c*y_inf(:,6);
 V_Macrophage = kappa * y_inf(:,6) .* y_inf(:,2);
@@ -155,9 +155,9 @@ hold on
 semilogy(report_time_inf, V_Natural, 'k:', 'LineWidth',1.5) % viral natural decay
 semilogy(report_time_inf, V_Macrophage, 'k-.', 'LineWidth',1.5) % viral decay by M1
 semilogy(report_time_inf, V_Abs, 'k--', 'LineWidth',1.5) % viral decay by Abs
-ylim([1e-1,1e+8])
+ylim([1e+1,1e+10])
 hold off
-ylabel('Viral dynamical rate (u_v/day)')
+ylabel('Viral dynamical rate ([u_v]/day)')
 xlabel('Days post infection (p.i.)')
 legend('viral growth','natural decay','engulfed by M1','killed by Abs','FontSize',18)
 set(gca,'YTick',[0.01,1,100,10000,1000000,100000000],'FontSize',23)
@@ -198,6 +198,12 @@ xlabel('Days post infection (p.i.)')
 ylabel('Anyibody')
 set(gca, 'FontSize',20)
 
+
+figure(96)
+plot(report_time_inf, y_inf(:,1), 'k','LineWidth', 2)
+xlabel('Days post infection (p.i.)')
+ylabel('Number of M macrophages')
+set(gca, 'FontSize',20)
 
 
 
