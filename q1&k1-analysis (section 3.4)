@@ -41,19 +41,19 @@ options = odeset('RelTol',1e-10,'AbsTol',1e-20);
                 k1,k2,k_m1,k_m2,delta,s1,s2,M0,g);  
                 
       
-      
-beta = 3.8e-5; % viral infectivity
-delta_I = 3.6; % decay rate of infected cells
-p = 7.1e-2; % viral production rate 
-c = 20;  % natural decay rate of virions
-kappa = 24 * 3.2e-5; % engulfment rate of M1 to virus
+%%      
+beta = 3e-8; % viral infectivity
+delta_I = 2; % decay rate of infected cells
+p = 210; % viral production rate 
+c = 5;  % natural decay rate of virions
+kappa = 2.2e-4;%7.3e-5; % engulfment rate of M1 to virus <---- 24*3.2e-5
+q1 = 1e-6; % activation rate of M1 by infected cells
 q2 = 1e-6; %1e-6; % activation rate of M1 by virus
 
-kappa_a = .2; % killing rate of virus by antibody
+kappa_a = 1; % killing rate of virus by antibody
 mu =  1e-6; % production rate of antibody
 rho = 1; % self-production rate of antibody               
 A_ast  = 1e+5; % assumed carrying capacity of antibody              
-
 
 %% time setting of viral infection
 
@@ -77,9 +77,9 @@ A = zeros(1,len_inf);
 M_inf0 = y2(end,1);  % intial value of M in infection, equivalent to the number of M at day 1000 in the absence of infection
 M1_inf0 = y2(end,2); % intial value of M1 in infectione, quivalent to the number of M1 at day 1000 in the absence of infection
 M2_inf0 = y2(end,3); % intial value of M2 in infection, equivalent to the number of M2 at day 1000 in the absence of infection
-T0 = 4e+8;
+T0 = 7e+7;
 I0 = 0;
-V0 = 3.3e-1; 
+V0 = 1; 
 A0 = 0;
 
 
@@ -95,7 +95,7 @@ A(1) = A0;
 init_inf = [M_inf0,M1_inf0,M2_inf0,T0,I0,V0,A0]';
 
       
-q1 = 5e-8:3e-7:1e-5; %1e-8:3e-7:2e-6;
+q1 = linspace(6e-8,6e-5,200);%5e-8:3e-7:1e-5; %1e-8:3e-7:2e-6;
 len_q1 = length(q1);
 plot_var_q1 = zeros(len_q1,2);
 
@@ -103,8 +103,8 @@ for j = 1:len_q1
 
         [~,y_inf_q1] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
                         k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
-                        beta,delta_I,p,c,kappa,q1(j),q2,...
-                        kappa_a,mu,rho,epsilon,lambda);
+                        beta,delta_I,p,c,kappa,q1(j),q2,...       
+                        kappa_a,mu,rho,A_ast);
                     
          plot_var_q1(j,1) = trapz(y_inf_q1(:,6));
          plot_var_q1(j,2) = trapz(y_inf_q1(:,2));   
@@ -117,11 +117,11 @@ end
 figure(34)
 yyaxis left 
 semilogx(q1,plot_var_q1(:,2),'k-.','LineWidth',2)
-ylabel('AUC of Macrophages')
+ylabel('AUC_{M1}')
 set(gca, 'ycolor','k')
 yyaxis right 
 semilogx(q1,plot_var_q1(:,1),'k-','LineWidth',2)
-ylabel('AUC of viral Load')
+ylabel('AUC_V')
 set(gca, 'ycolor','k')
 legend('M1','V')
 xlabel('log(q_1)') 
@@ -129,7 +129,7 @@ xlabel('log(q_1)')
 set(gca, 'FontSize',24)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%
 q1 = 1e-6;
 k1 = 0.02:0.01:1;
 len_k1 = length(k1);
@@ -139,8 +139,8 @@ for j = 1:len_k1
 
         [~,y_inf_k1] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
                         k1(j),k2,k_m1,k_m2,delta,s1,s2,M0,g,...
-                        beta,delta_I,p,c,kappa,q1,q2,...
-                        kappa_a,mu,rho,epsilon,lambda);
+                        beta,delta_I,p,c,kappa,q1,q2,...       
+                        kappa_a,mu,rho,A_ast);
                     
          plot_var_k1(j,1) = trapz(y_inf_k1(:,6));
          plot_var_k1(j,2) = trapz(y_inf_k1(:,2));   
@@ -164,7 +164,3 @@ legend('M1','V')
 xlabel('k_1') 
 
 set(gca, 'FontSize',24)
-
-
-
-
