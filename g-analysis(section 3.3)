@@ -130,7 +130,7 @@ options = odeset('RelTol',1e-10,'AbsTol',1e-20);
 
 
 %%        
-g = .2:0.02:2.5; 
+g = .02:0.02:2.5; 
 g_length = length(g);
 vectors = zeros(g_length,4);
 
@@ -156,18 +156,17 @@ len_im = length(report_time_im);
 
 %% Viral parameters 
 
-
-delta_I = 2; % decay rate of infected cells
-p = 210; % viral production rate 
-c = 5;  % natural decay rate of virions
-kappa = 8.8e-5; % engulfment rate of M1 to virus <---- 24*3.2e-5
+delta_I = 2.1; % decay rate of infected cells
+p = 1e-3; % viral production rate 
+c = 1;  % natural decay rate of virions
+kappa = 4.6e-6; % engulfment rate of M1 to virus <---- 24*3.2e-5
 q1 = 1e-6; % activation rate of M1 by infected cells
-q2 = 1e-6; %1e-6; % activation rate of M1 by virus
+q2 = 1e-6; % activation rate of M1 by virus
 
-kappa_a = 1; % killing rate of virus by antibody
-mu =  1e-6; % production rate of antibody
+kappa_a = 3; % killing rate of virus by antibody
+mu =  1e-8; % production rate of antibody
 rho = 1; % self-production rate of antibody               
-A_ast  = 1e+5; % assumed carrying capacity of antibody   
+A_ast  = 1e+3; % assumed carrying capacity of antibody           
 
 %% time setting 
 
@@ -195,9 +194,9 @@ M1_inf0 = y_im(end,2);
 M2_inf0 = y_im(end,3);
 
 
-T0 = 7e+7;
+T0 = 4e+8;
 I0 = 0;
-V0 = 1; %3.3e-1; % 3.3e-1
+V0 = 0.33;
 A0 = 0;
 
 
@@ -216,7 +215,7 @@ init_inf = [M_inf0,M1_inf0,M2_inf0,T0,I0,V0,A0]';
 
 %%
 
-beta = linspace(2e-9,2e-8,225);
+beta = linspace(1e-6,1.5e-4,500);
 len_beta = length(beta);
 plot_var = zeros(len_beta,2);
 for j = 1:len_beta
@@ -229,7 +228,7 @@ for j = 1:len_beta
          plot_var(j,1) = trapz(y_inf_k(:,6));   % V 
          plot_var(j,2) = trapz(y_inf_k(:,2));   % M1
 
-         R(j) = (p*beta(j)*T0)/ (delta_I * (c+kappa*y_im(end,2)));
+         
          
 end
  
@@ -239,10 +238,10 @@ xAtMax_beta = beta(indexOfMaxY);
 
 
 %%
-Indx_R_less_1 = find(R < 1);
-Indx_R_less_1_first = Indx_R_less_1(end);
 beta1(i) = xAtMax_beta;
-beta2(i) = beta(Indx_R_less_1_first);
+beta2(i) = delta_I * (c + kappa * y_im(end,2)) / (p * T0);
+
+
 
 
 
