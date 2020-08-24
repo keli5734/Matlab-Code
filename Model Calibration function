@@ -1,0 +1,63 @@
+
+
+function S = Fit(unknown,t, ~)
+Initial_condition = [1.917e+5,2.0446e+5,3.2674e+6,4e+8,0,0.33,0]';
+
+[T,y_inf] = ode15s(@fun_inf_lambda,t,Initial_condition);
+    
+    function var = fun_inf_lambda(~,y)
+        
+        k1 = 0.5;  % conversion rate of M to M1 
+        k2 = 0.5;  % conversion rate of M to M2
+        k_m1 = 24/72; % conversion rate of M1 to M  
+        k_m2 = 24/72; % conversion rate of M2 to M
+        delta = .02;  % natural decay rate of M1 and M2
+        s1 = 1; % suppressive effect of M2 on conversion process of M to M1
+        s2 = 1; % prompting effect of M1 on conversion process of M to M2
+        g = 0.2; % regrowth rate of M 
+        
+        %beta = 1.3e-4;
+        p = 2.2e-3;
+        c = 1;
+        delta_I = 2.1;
+        kappa = 4.63e-6;
+
+
+        q1 = 1e-6; % activation rate of M1 by infected cells
+        q2 = 1e-6; %1e-6; % activation rate of M1 by virus
+
+        %{
+        kappa_a = .2; % killing rate of virus by antibody
+        mu =  2e-7; % production rate of antibody
+        rho = 1; % self-production rate of antibody               
+        A_ast  = 1e+2; % assumed carrying capacity of antibody    
+        %}
+        
+        kappa_a = 3; % killing rate of virus by antibody
+        mu =  1e-8; % production rate of antibody
+        rho = 1; % self-production rate of antibody               
+        A_ast  = 1e+3; % assumed carrying capacity of antibody              
+
+
+        M0 = 1e+6;
+
+        
+        ydot = zeros(7,1);
+        ydot(1) = g * (1 - (y(1) + y(2) + y(3))/M0) * y(1) -   k1/(1 + s1*(y(3)/M0))*y(1) - k2 * (1 + s2* (y(2)/M0))*y(1)...
+            + k_m2 * y(3) + k_m1 * y(2) - q1 * y(5) * y(1) - q2 * y(6) * y(1); %M0
+        ydot(2) =  k1/(1 + s1*(y(3)/M0))*y(1) - k_m1 * y(2) - delta*y(2) + q1 * y(5) * y(1) + q2 * y(6) * y(1); %M1
+        ydot(3) = k2 * (1 + s2* (y(2)/M0))*y(1) - k_m2 * y(3) - delta * y(3); %M2
+
+        ydot(4) = -unknown(1) * y(4) * y(6); %T
+        ydot(5) = unknown(1) * y(4) * y(6) - delta_I * y(5); %I
+        ydot(6) = p * y(5) - c * y(6) - kappa * y(2) * y(6) - kappa_a * y(7) * y(6); %V
+
+        ydot(7) = mu * y(2) + rho * y(7) * (1 - y(7)/A_ast); %A 
+        var = ydot;
+    end 
+%This is pool data
+S = [log(y_inf(:,6))',log(y_inf(:,6))',log(y_inf(:,6))',log(y_inf(:,6))',log(y_inf(:,6))',log(y_inf(:,6))']';
+
+%This is individual data
+%S = log(y_inf(:,6));
+end 
