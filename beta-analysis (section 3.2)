@@ -45,18 +45,18 @@ options = odeset('RelTol',1e-10,'AbsTol',1e-20);
                 
                 
 %% viral infection parameters
-%beta = 3e-8;
-delta_I = 2; % decay rate of infected cells
-p = 210; % viral production rate 
-c = 5;  % natural decay rate of virions
-kappa = 8.8e-5; % engulfment rate of M1 to virus <---- 24*3.2e-5
-q1 = 1e-6; % activation rate of M1 by infected cells
-q2 = 1e-6; %1e-6; % activation rate of M1 by virus
 
-kappa_a = 1; % killing rate of virus by antibody
-mu =  1e-6; % production rate of antibody
+delta_I = 2.1; % decay rate of infected cells
+p = 5e-3; % viral production rate 
+c = 1;  % natural decay rate of virions
+kappa = 4.6e-6; % engulfment rate of M1 to virus <---- 24*3.2e-5
+q1 = 1e-6; % activation rate of M1 by infected cells
+q2 = 1e-6; % activation rate of M1 by virus
+
+kappa_a = 3; % killing rate of virus by antibody
+mu =  1e-8; % production rate of antibody
 rho = 1; % self-production rate of antibody               
-A_ast  = 1e+5; % assumed carrying capacity of antibody   
+A_ast  = 1e+3; % assumed carrying capacity of antibody            
 %% time setting of viral infection
 
 t0_inf = 0;
@@ -79,9 +79,9 @@ A = zeros(1,len_inf);
 M_inf0 = y2(end,1);  % intial value of M in infection, equivalent to the number of M at day 1000 in the absence of infection
 M1_inf0 = y2(end,2); % intial value of M1 in infectione, quivalent to the number of M1 at day 1000 in the absence of infection
 M2_inf0 = y2(end,3); % intial value of M2 in infection, equivalent to the number of M2 at day 1000 in the absence of infection
-T0 = 7e+7;
+T0 = 4e+8;
 I0 = 0;
-V0 = 1; 
+V0 = 0.33; 
 A0 = 0;
 
 
@@ -99,8 +99,7 @@ A(1) = A0;
 init_inf = [M_inf0,M1_inf0,M2_inf0,T0,I0,V0,A0]';
 
 %%                
-%beta  = 2e-10 : 3e-10 : 8e-8; % setting the ranges of beta
-beta = linspace(7e-10,3.3e-8,170);
+beta = linspace(1e-6,1.5e-4,300);
 len_beta = length(beta); % length of beta
 plot_var = zeros(len_beta,2); 
 T_var= zeros(len_beta,1);
@@ -161,96 +160,3 @@ hold off
 xlabel('\beta') 
 ylabel('Number of epithelial cells')
 set(gca, 'FontSize',24)
-
-%% P sensitivity
-
-p = linspace(10,250,250);
-len_p = length(p); % length of beta
-plot_var = zeros(len_p,2); 
-
-for j = 1:len_p
-        [~,y_inf_p] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
-                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
-                        beta,delta_I,p(j),c,kappa,q1,q2,...       
-                        kappa_a,mu,rho,A_ast);
-         % Overall AUC           
-         plot_var(j,1) = trapz(y_inf_p(:,6)); % the AUC of viral shedding
-         plot_var(j,2) = trapz(y_inf_p(:,2)); % the AUC of M1 macrophages 
-        
-       
-end 
-
-[maxY_p, indexOfMaxY_p] = max(plot_var(:,2)); % find the maximal value of the AUC of M1 and the postition of that value
-xAtMax_p = p(indexOfMaxY_p); % the beta value that achieves maximal value of the M1 AUC.
-p_N = delta_I * (c + kappa * y2(end,2)) / (beta * T0); % the beta value that determines infection will take hold or not. 
-
-%%
-figure(66)
-subplot(2,1,2)
-yyaxis left 
-plot(p,plot_var(:,2),'k-.','LineWidth',2)
-ylabel('AUC_{M1}')
-set(gca, 'ycolor','k')
-yyaxis right 
-plot(p,plot_var(:,1),'k-','LineWidth',2)
-ylabel('AUC_V')
-set(gca, 'ycolor','k')
-
-hold on
-patch([0 p_N p_N 0], [0 0 max(ylim) max(ylim)], [0.5 0.5 0.5],'FaceAlpha',.6,'EdgeColor','None')
-patch([p_N p_N xAtMax_p xAtMax_p ], [0 max(ylim) max(ylim) 0], [0.4940 0.1840 0.5560],'FaceAlpha',.15,'EdgeColor','None')
-patch([xAtMax_p max(xlim) max(xlim) xAtMax_p], [0 0 max(ylim) max(ylim)], [0.9290 0.6940 0.1250],'FaceAlpha',.15,'EdgeColor','None')
-hold off
-
-legend('M1','V')
-xlabel('p') 
-xlim([0,max(p)])
-title('g = 2')
-set(gca, 'FontSize',15)
-
-
-%% kappa sensitivity
-
-kappa = linspace(7e-5,1.2e-3,200);
-len_kappa = length(kappa); % length of beta
-plot_var = zeros(len_kappa,2); 
-
-for j = 1:len_kappa
-        [~,y_inf_kappa] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
-                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
-                        beta,delta_I,p,c,kappa(j),q1,q2,...       
-                        kappa_a,mu,rho,A_ast);
-         % Overall AUC           
-         plot_var(j,1) = trapz(y_inf_kappa(:,6)); % the AUC of viral shedding
-         plot_var(j,2) = trapz(y_inf_kappa(:,2)); % the AUC of M1 macrophages 
-        
-       
-end 
-
-[maxY_kappa, indexOfMaxY_kappa] = max(plot_var(:,2)); % find the maximal value of the AUC of M1 and the postition of that value
-xAtMax_kappa = kappa(indexOfMaxY_kappa); % the beta value that achieves maximal value of the M1 AUC.
-kappa_N = (p*beta*T0/delta_I - c)/ M1_inf0; % the beta value that determines infection will take hold or not. 
-
-%%
-figure(66)
-subplot(2,1,2)
-yyaxis left 
-plot(kappa,plot_var(:,2),'k-.','LineWidth',2)
-ylabel('AUC_{M1}')
-set(gca, 'ycolor','k')
-yyaxis right 
-plot(kappa,plot_var(:,1),'k-','LineWidth',2)
-ylabel('AUC_V')
-set(gca, 'ycolor','k')
-
-hold on
-patch([0 xAtMax_kappa xAtMax_kappa 0], [0 0 max(ylim) max(ylim)], [0.9290 0.6940 0.1250],'FaceAlpha',.15,'EdgeColor','None')
-patch([xAtMax_kappa kappa_N kappa_N xAtMax_kappa], [0 0 max(ylim) max(ylim)],[0.4940 0.1840 0.5560],'FaceAlpha',.15,'EdgeColor','None')
-patch([kappa_N max(xlim) max(xlim) kappa_N], [0 0 max(ylim) max(ylim)], [0.5 0.5 0.5],'FaceAlpha',.6,'EdgeColor','None')
-hold off
-
-legend('M1','V')
-xlabel('\kappa') 
-xlim([min(kappa),max(kappa)])
-title('g = 2')
-set(gca, 'FontSize',15)
