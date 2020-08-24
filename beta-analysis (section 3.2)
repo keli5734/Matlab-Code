@@ -47,7 +47,7 @@ options = odeset('RelTol',1e-10,'AbsTol',1e-20);
 %% viral infection parameters
 
 delta_I = 2.1; % decay rate of infected cells
-p = 5e-3; % viral production rate 
+p = 1e-3; % viral production rate 
 c = 1;  % natural decay rate of virions
 kappa = 4.6e-6; % engulfment rate of M1 to virus <---- 24*3.2e-5
 q1 = 1e-6; % activation rate of M1 by infected cells
