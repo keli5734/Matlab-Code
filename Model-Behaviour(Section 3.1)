@@ -61,18 +61,18 @@ set(gca, 'FontSize',24)
                 
 %% Parameters of Virus and virus-macrophage interactions                
 
-beta = 3e-8; % viral infectivity
-delta_I = 2; % decay rate of infected cells
-p = 210; % viral production rate 
-c = 5;  % natural decay rate of virions
-kappa = 8.8e-5; % engulfment rate of M1 to virus <---- 24*3.2e-5
+beta = 1.31e-4; % viral infectivity
+delta_I = 2.1; % decay rate of infected cells
+p = 2.2e-3; % viral production rate 
+c = 1;  % natural decay rate of virions
+kappa = 4.6e-6; % engulfment rate of M1 to virus <---- 24*3.2e-5
 q1 = 1e-6; % activation rate of M1 by infected cells
-q2 = 1e-6; %1e-6; % activation rate of M1 by virus
+q2 = 1e-6; % activation rate of M1 by virus
 
-kappa_a = 1; % killing rate of virus by antibody
-mu =  1e-6; % production rate of antibody
+kappa_a = 3; % killing rate of virus by antibody
+mu =  1e-8; % production rate of antibody
 rho = 1; % self-production rate of antibody               
-A_ast  = 1e+5; % assumed carrying capacity of antibody              
+A_ast  = 1e+3; % assumed carrying capacity of antibody              
 
 
 %% time setting of viral infection
@@ -97,9 +97,9 @@ A = zeros(1,len_inf);
 M_inf0 = y2(end,1);  % intial value of M in infection, equivalent to the number of M at day 1000 in the absence of infection
 M1_inf0 = y2(end,2); % intial value of M1 in infectione, quivalent to the number of M1 at day 1000 in the absence of infection
 M2_inf0 = y2(end,3); % intial value of M2 in infection, equivalent to the number of M2 at day 1000 in the absence of infection
-T0 = 7e+7;
+T0 = 4e+8;
 I0 = 0;
-V0 = 1; 
+V0 = 0.33; 
 A0 = 0;
 
 
