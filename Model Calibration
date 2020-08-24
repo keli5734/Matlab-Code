@@ -1,0 +1,179 @@
+%% Baccam Data 
+T = readtable('data_set_all_patients.xlsx');
+Days = T{1:8,{'Time_days'}}(2:end);
+Viral_load1 = T{2:8,{'Viral_load'}};   % patient 1 
+Viral_load2 = T{10:16,{'Viral_load'}}; % patient 2 
+Viral_load3 = T{18:24,{'Viral_load'}}; % patient 3
+Viral_load4 = T{26:32,{'Viral_load'}}; % patient 4
+Viral_load5 = T{34:40,{'Viral_load'}}; % patient 5
+Viral_load6 = T{42:48,{'Viral_load'}}; % patient 6
+
+% Pooled viral load Baccam
+pool_viral_load_baccam = [Viral_load1',Viral_load2',Viral_load3',Viral_load4',Viral_load5',Viral_load6']';
+pool_viral_load_plot_baccam = [Viral_load1,Viral_load2,Viral_load3,Viral_load4,Viral_load5,Viral_load6];
+transform_pool_viral_load_baccam = log(pool_viral_load_baccam);
+
+
+%%
+unknown0 = [1e-5];
+lb = [0];
+ub = [1]; 
+options = optimoptions('lsqcurvefit','Algorithm','trust-region-reflective','OptimalityTolerance',1e-20);
+problem = createOptimProblem('lsqcurvefit',...
+                             'objective', @Fit,...
+                             'xdata', Days,...
+                             'ydata', transform_pool_viral_load_baccam,...
+                             'x0',unknown0,...
+                             'lb', lb,...
+                             'ub', ub,...
+                             'options',options);
+
+
+gs = GlobalSearch('FunctionTolerance',1e-6,'NumTrialPoints',2000);
+ms = MultiStart(gs);
+rng(20200807)
+[unknown,fval,exitflag,output,solutions] = run(ms,problem,50);
+
+
+%% Model simulation using estimated parameter values 
+% Macrophage parameters 
+
+k1 = 0.5;  % conversion rate of M to M1 
+k2 = 0.5;  % conversion rate of M to M2
+k_m1 = 24/72; % conversion rate of M1 to M  
+k_m2 = 24/72; % conversion rate of M2 to M
+delta = .02;  % natural decay rate of M1 and M2
+s1 = 1; % suppressive effect of M2 on conversion process of M to M1
+s2 = 1; % prompting effect of M1 on conversion process of M to M2
+g = 0.2; % regrowth rate of M 
+
+
+
+t0 = 0;
+t_end = 1000; % simulation of 1000 days
+report_point = (t_end - t0) * 24 + 1;
+report_time = linspace(t0,t_end,report_point);
+len = length(report_time);
+
+
+M = zeros(1,len);
+M1 = zeros(1,len);
+M2 = zeros(1,len);
+
+M0 = 1e+6; % initial value of M 
+M10 = 0;  % initial value of M1
+M20 = 0;  % initial value of M2
+
+M(1) = M0;
+M1(1) = M10;
+M2(1) = M20;
+
+
+init = [M0,M10,M20]';
+
+options = odeset('RelTol',1e-10,'AbsTol',1e-20); 
+
+
+[~,y2] = ode15s(@fun_NonInf_SepM, report_time, init, options,...
+                k1,k2,k_m1,k_m2,delta,s1,s2,M0,g);  
+                
+                % use ode15s function to solve ODE equtions. 
+                % The function 'fun_NonInf_SepM' is in a separated file. 
+                
+
+                           
+
+
+beta = unknown(1);  % viral infectivity
+p = 2.2e-3; % viral replication rate    
+delta_I = 2.1; % decay rate of infected cells 
+c = 1; % natural decay rate of virus 
+kappa = 4.63e-6; % the internalisation rate of virus by macrophages 
+
+
+q1 = 1e-6; % activation rate of M1 by infected cells
+q2 = 1e-6; %1e-6; % activation rate of M1 by virus
+
+kappa_a = 3; % killing rate of virus by antibody
+mu =  1e-8; % production rate of antibody
+rho = 1; % self-production rate of antibody               
+A_ast  = 1e+3; % assumed carrying capacity of antibody              
+
+
+% time setting of viral infection
+
+t0_inf = 0;
+t_end_inf = 15; % consider 15 days post inoculation of virus
+report_point_inf = (t_end_inf - t0_inf) * 24 + 1;
+report_time_inf = linspace(t0_inf, t_end_inf, report_point_inf);
+len_inf = length(report_time_inf);
+
+% Viral Variables 
+
+M_inf = zeros(1,len_inf);
+M1_inf = zeros(1,len_inf);
+M2_inf = zeros(1,len_inf);
+T = zeros(1,len_inf);
+I = zeros(1,len_inf);
+V = zeros(1,len_inf);
+A = zeros(1,len_inf);
+
+
+M_inf0 = y2(end,1);  % intial value of M in infection, equivalent to the number of M at day 1000 in the absence of infection
+M1_inf0 = y2(end,2); % intial value of M1 in infectione, quivalent to the number of M1 at day 1000 in the absence of infection
+M2_inf0 = y2(end,3); % intial value of M2 in infection, equivalent to the number of M2 at day 1000 in the absence of infection
+T0 = 4e+8;
+I0 = 0;
+V0 = 3.3e-1; 
+A0 = 0;
+
+
+M_inf(1) = M_inf0;
+M1_inf(1) = M1_inf0;
+M2_inf(1) = M2_inf0;
+T(1) = T0;
+I(1) = I0;
+V(1) = V0;
+A(1) = A0;
+
+
+init_inf = [M_inf0,M1_inf0,M2_inf0,T0,I0,V0,A0]';
+
+[~,y_inf] = ode15s(@fun_inf_lambda, report_time_inf, init_inf, options,...
+                        k1,k2,k_m1,k_m2,delta,s1,s2,M0,g,...
+                        beta,delta_I,p,c,kappa,q1,q2,...
+                        kappa_a,mu,rho, A_ast); % the function of 'fun_inf_lambda' is in a separated file. 
+
+
+            
+
+%%
+figure(5)
+semilogy(pool_viral_load_plot_baccam,'ko','LineWidth',1.5)
+hold on 
+%%
+semilogy(report_time_inf, y_inf(:,6),'b','LineWidth',2)
+ylim([1e-1,1e+10])
+ylabel('Viral load (fold change)')
+xlabel('Days post infection')
+set(gca, 'ycolor','k')
+%legend('Data','Fit \beta','Fit \beta and \kappa','Fit \kappa','Fit \kappa and c','Fit \beta, \kappa and c','Fit \beta and c')
+
+%% detailed contribution of each components on the right-hand side of dV/dt to viral replication (Fig.3b in the main text of the paper)
+V_Growth = p*y_inf(:,5);
+V_Natural = c*y_inf(:,6);
+V_Macrophage = kappa * y_inf(:,6) .* y_inf(:,2);
+V_Abs = kappa_a * y_inf(:,6) .* y_inf(:,7);
+
+figure(4)
+semilogy(report_time_inf, V_Growth,'k','LineWidth',1.5) % Viral Growth
+hold on
+semilogy(report_time_inf, V_Natural, 'k:', 'LineWidth',1.5) % viral natural decay
+semilogy(report_time_inf, V_Macrophage, 'k-.', 'LineWidth',1.5) % viral decay by M1
+semilogy(report_time_inf, V_Abs, 'k--', 'LineWidth',1.5) % viral decay by Abs
+ylim([1e+0,1e+10])
+hold off
+ylabel('Viral dynamical rate ([u_v]/day)')
+xlabel('Days post infection (p.i.)')
+legend('viral growth','natural decay','engulfed by M1','killed by Abs','FontSize',18)
+set(gca,'YTick',[0.01,1,100,10000,1000000,100000000],'FontSize',23)
